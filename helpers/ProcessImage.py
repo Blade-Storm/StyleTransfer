@@ -2,6 +2,8 @@ from PIL import Image
 import torch
 from torchvision import transforms
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 def load_image(img_path, max_size=400, shape=None):
     ''' 
@@ -61,3 +63,17 @@ def im_convert(tensor):
     image = image.clip(0, 1)
 
     return image
+
+
+def display_final_target(content, target):
+    '''
+        Displays the final target image with the original content image
+
+        Inputs:
+        content - The original content image
+        target - The final target image
+    '''
+    # display content and final, target image
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+    ax1.imshow(im_convert(content))
+    ax2.imshow(im_convert(target))
