@@ -32,7 +32,7 @@ parser.add_argument('style_directory',
 parser.add_argument('--save_dir', default='./',
                     help="The relative path to save the neural network checkpoint")              
 # 4. Get a list of weights for the style
-parser.add_argument('--style_weights', default=[], nargs=4, type=int,
+parser.add_argument('--style_weights', default=[], nargs=5, type=float,
                     help="A list of weights to use on each convolutional layer for the style")
 # 5. Get the amount of steps (iterations) used for creating the target image
 parser.add_argument('--steps', default=2000, type=int,
@@ -106,4 +106,4 @@ ProcessImage.display_final_target(content, target)
 
 
 # Save the checkpoint
-modelActions.save_checkpoint(save_dir, model)
+modelActions.save_checkpoint(save_dir, model, style_grams, style_weights, content_features)

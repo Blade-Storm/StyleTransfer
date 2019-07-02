@@ -50,7 +50,7 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
         Outputs:
         This method will display the target image as its being created
     '''
-    print("Creating the target image...\n")
+    print("Creating the target image...")
     # for displaying the target image, intermittently
     show_every = show_every
 
@@ -60,17 +60,16 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
 
     for ii in range(1, steps+1):
         
-        ## TODO: get the features from your target image    
-        ## Then calculate the content loss
+        # Get the features from your target image    
+        # Then calculate the content loss
         target_features = ProcessFeatures.get_features(target, model)
         content_loss = torch.mean((target_features['conv4_2'] - content_features['conv4_2'])**2)
         
-        # the style loss
-        # initialize the style loss to 0
+        # Initialize the style loss to 0
         style_loss = 0
-        # iterate through each style layer and add to the style loss
+        # Iterate through each style layer and add to the style loss
         for layer in style_weights:
-            # get the "target" style representation for the layer
+            # Get the "target" style representation for the layer
             target_feature = target_features[layer]
             _, d, h, w = target_feature.shape
             
@@ -103,7 +102,7 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
     print("Done creating the target image.\n")
 
 
-def save_checkpoint(save_path, model):
+def save_checkpoint(save_path, model, style_grams, style_weights, content_features):
     '''
         Saves a checkpoint file for the style transfer model
 
@@ -111,8 +110,46 @@ def save_checkpoint(save_path, model):
         save_path: The relative path, including the file name and extension, to save the checkpoint to
         model: The model that was used to train for the style_transfer
     '''
-    print("Saving the checkpoint...\n")
-    checkpoint = {'state_dict': model.state_dict()}
-
+    print("Saving the checkpoint...")
+    checkpoint = {'state_dict': model.state_dict(),
+                  'style_grams': style_grams,
+                  'style_weights': style_weights,
+                  'content_features': content_features}
+    
     torch.save(checkpoint, save_path)
     print("Done saving the checkpoint.\n")
+
+
+
+def load_checkpoint(load_path, gpu):
+    '''
+        Loads a checkpoint to be used for style transfer
+
+        Inputs:
+        save_path - The relative file path, including the file name and extension, of the checkpoint
+
+        Output:
+        returns the model loaded with the checkpoint
+    '''
+    # Get the checkpoint from the file path
+    checkpoint = torch.load(load_path)
+
+    # Load the vgg19 model from torchvision
+    model = getattr(models, 'vgg19')(pretrained = True).features
+
+    # Load the state_dict from the checkpoint into the model
+    model.load_state_dict(checkpoint['state_dict'])
+    style_grams = checkpoint['style_grams']
+    style_weights = checkpoint['style_weights']
+    #model.content_features = checkpoint['content_features']
+
+    # Freeze the parameters so we dont backpropagate through them
+    for param in model.parameters():
+        param.requires_grad = False
+
+    # Move the model to GPU, if available, and chosen
+    device = torch.device("cuda" if torch.cuda.is_available() and gpu else "cpu")
+    model.to(device)
+
+    # Return the model
+    return model, style_grams, style_weights

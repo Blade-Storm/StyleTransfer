@@ -1,8 +1,10 @@
 from PIL import Image
 import torch
 from torchvision import transforms
+from torchvision.utils import save_image
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
 def load_image(img_path, max_size=400, shape=None):
@@ -74,6 +76,28 @@ def display_final_target(content, target):
         target - The final target image
     '''
     # display content and final, target image
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
     ax1.imshow(im_convert(content))
     ax2.imshow(im_convert(target))
+    plt.show()
+
+
+def save_target_image(image, image_name):
+    '''
+        Saves the target image after transfering the style
+
+        Inputs
+        image - The target image to save
+        image_name - The name to save the image as
+    '''
+    print("Saving target image...")
+    # Check that the Images/target directory exists. If not create one
+    if not os.path.isdir('./Images/target/'):
+        os.makedirs('./Images/target/')
+
+    # Save the image in the target directory with the jpg extension
+    plt.axis('off')
+    plt.imshow(im_convert(image))
+    plt.savefig('./Images/target/' + image_name + '.jpg', bbox_inches='tight')
+
+    print("Done saving target image.\n")
