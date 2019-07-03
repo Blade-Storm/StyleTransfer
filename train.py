@@ -29,7 +29,7 @@ parser.add_argument('content_directory',
 parser.add_argument('style_directory', 
                     help="The relative path to the style image including the file name and extension.")
 # 3. Set the directory to the image files to train with
-parser.add_argument('--save_dir', default='./',
+parser.add_argument('--save_dir',
                     help="The relative path to save the neural network checkpoint")              
 # 4. Get a list of weights for the style
 parser.add_argument('--style_weights', default=[], nargs=5, type=float,
@@ -106,4 +106,4 @@ ProcessImage.display_final_target(content, target)
 
 
 # Save the checkpoint
-modelActions.save_checkpoint(save_dir, model, style_grams, style_weights, content_features)
+modelActions.save_checkpoint(save_dir, model, style_grams, style_weights)

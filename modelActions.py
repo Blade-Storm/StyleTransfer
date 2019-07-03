@@ -102,7 +102,7 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
     print("Done creating the target image.\n")
 
 
-def save_checkpoint(save_path, model, style_grams, style_weights, content_features):
+def save_checkpoint(save_path, model, style_grams, style_weights):
     '''
         Saves a checkpoint file for the style transfer model
 
@@ -113,8 +113,7 @@ def save_checkpoint(save_path, model, style_grams, style_weights, content_featur
     print("Saving the checkpoint...")
     checkpoint = {'state_dict': model.state_dict(),
                   'style_grams': style_grams,
-                  'style_weights': style_weights,
-                  'content_features': content_features}
+                  'style_weights': style_weights}
     
     torch.save(checkpoint, save_path)
     print("Done saving the checkpoint.\n")
