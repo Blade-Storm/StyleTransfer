@@ -1,5 +1,11 @@
 # StyleTransfer
-A neural network (pretrained vgg19) that transfers the style from one image onto the content of another. This was a project in [Udacity's deep learning program](https://www.udacity.com/course/deep-learning-nanodegree--nd101) which can be found [here](https://github.com/udacity/deep-learning-v2-pytorch/tree/master/style-transfer).
+A pretrained VGG19 network that transfers the style from one image onto the content of another. This was a project in [Udacity's deep learning program](https://www.udacity.com/course/deep-learning-nanodegree--nd101) which can be found [here](https://github.com/udacity/deep-learning-v2-pytorch/tree/master/style-transfer). Some examples created from the images in this repo can be found below:
+
+|Content| Style                      | Transfer                          |
+|:-------:| :--------------------------: | :---------------------------------: |
+|![image](./Images/content/Me.jpg) | ![image](./Images/styles/starry-night.jpg) | ![image](./Images/target/me-starry.jpg) |
+|![image](./Images/content/nature.jpg)|![image](./Images/styles/naturescape.jpg)| ![image](./Images/target/nature-naturescape.jpg)|
+|![image](./Images/content/house.jpg)| ![image](./Images/styles/scream.jpg) |![image](./Images/target/house-scream.jpg)
 
 
 ## Downloads and Installations
@@ -27,47 +33,24 @@ Install the following packages if you dont already have them:
 ## How to use
 You will need at least two images, one style image and one content image, to create a target image that has the merged style and content. In the Images folder there are two subfolders: content and styles, where the content and style images will be pulled from. Additionally there is a folder for the target images to be saved. 
 
-First, we need to do a forward pass on the neural network with the content and style images to get the features that will be mapped to the target image. This will create a checkpoint file that will have the style grams and weights we want to use in the style transfer. To do this we can run the `train.py` file like so:
+First, we need to do a forward pass on the neural network with the content and style images to get the features that will be mapped to the target image. This will create a two checkpoint files that will have the style grams and weights we want to use in the style transfer. One checkpoint file is a "low" profile of the style transfer that is saved halfway through the training process as well as a "high" profile of the style transfer that is saved at the end of the training. To do this we can run the `transfer_style.py` file like so:
 
-`python train.py './Images/content/Building.jpg' './Images/styles/Outrun.jpg' --save_dir './checkpoint.pth' --gpu`
+`python transfer_style.py --content_dir './Images/content/house.jpg' --style_dir './Images/styles/abstract.jpg' --checkpoint_name "myStyleCheckpoint" --gpu --train --steps 6000 --show_every 1000`
 
 Here is a list of all of the arguments you can use in the train along with an example:
 
-1. content_directory: 
-- The relative path to the content image file to train on. Required
-2. style_directory: 
-- The relative path to the style image file to train on. Required
-3. --save_dir: 
-- The relative path to the directory you wish to save the trained model's checkpoint to. This includes the file name and extension Required
-4. --style_wegihts:
-- A list of style weights, as floats, to use from the convolutional layers. There are five weights that can range from 0 to 1. Default is: 1.0 0.8 0.5 0.3 0.1
-5. --steps:
-- The amount of steps (iterations) used for creating the target image. Default is 2000
-6. --show_every:
-- The amount of iterations to wait and show the progress of the target image. Default is 400
-7. --gpu
-- If you would like to use the GPU for training. Default is False
-
-Example use of all arguments:
-`python train.py './Images/content/Building.jpg' './Images/styles/Outrun.jpg' --save_dir './checkpoint.pth' --style_weights 1.0 0.8 0.8 0.3 0.2 --steps 4000 --show_every 1000 --gpu`
+1. `--content_dir`: The relative path to the content image file to train on. Required
+2. `--style_dir`: The relative path to the style image file to train on. Required
+3. `--checkpoint_name`: The name of the checkpoint to get or set
+4. `--style_wegihts`: A list of style weights, as floats, to use from the convolutional layers. There are five weights that can range from 0 to 1. Default is: 1.0 0.8 0.5 0.3 0.1
+5. `--steps`: The amount of steps (iterations) used for creating the target image. Default is 2000
+6. `--show_every`: The amount of iterations to wait and show the progress of the target image. Default is 400
+7. `--gpu`: If you would like to use the GPU for training. Default is False
+8. `--target_image`: The name for target image. This will be used as the file name when saving.
+9. `--train`: A boolean flag for if we are training a new style gram matrix. Default is False
 
 
-### Using a trained model for style transfer
+### Using a pre-made style gram matrix for style transfer
 Technically we arent training a model for the style transfer but using it to calculate the style gram matricies from the convolutional layers. In this project I store those value in the checkpoint file so we can do the style transfer without the original style image. To do so we can use the `transfer_style.py` file like so:
 
-`python transfer_style.py './Images/content/Building.jpg' --checkpoint_direcotry './checkpoint.pth' --target_image './Images/target/MyCoolImage.jpg' --gpu`
-
-Here are all of the arguments for `transfer_style.py`:
-
-1. content_directory: 
-- The relative path to the content image file to train on. Required
-2. --checkpoint_directory: 
-- The relative path to save the neural network checkpoint including the file name and extension. Required
-3. --target_image: 
-- The name for target image. This will be used as the file name when saving. Required
-4. --steps:
-- The amount of steps (iterations) used for creating the target image. Default is 2000
-5. --show_every:
-- The amount of iterations to wait and show the progress of the target image. Default is 400
-6. --gpu:
-- If you would like to use the GPU for training. Default is False
+`python transfer_style.py --content_dir './Images/content/house.jpg' --checkpoint_name "myStyleCheckpoint-high.pth" --gpu --steps 6000 --show_every 1000`
