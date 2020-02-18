@@ -90,12 +90,12 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
             
         ## Calculate the *total* loss
         total_loss = (content_loss * content_weight) + (style_loss * style_weight)
-        
+          
         # Update the target image
         optimizer.zero_grad()
         total_loss.backward()
         optimizer.step()
-        
+
         # display intermediate images and print the loss
         if  ii % show_every == 0:
             print('Total loss: ', total_loss.item())
@@ -108,6 +108,7 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
             save_checkpoint(save_dir + "-low.pth", model, style_grams, style_weights)
 
 
+    # Once training is finished save the checkpoint
     if train:
         save_checkpoint(save_dir + "-high.pth", model, style_grams, style_weights)
     print("Done creating the target image(s).\n")
