@@ -4,6 +4,7 @@ from torchvision import models
 import torch
 import torch.optim as optim
 import matplotlib.pyplot as plt
+import os
 
 
 def create_model(gpu):
@@ -34,7 +35,7 @@ def create_model(gpu):
 
 
 
-def create_target_image(target, model, steps, show_every, style_grams, style_weights, content_features, content_weight, style_weight):
+def create_target_image(target, model, steps, show_every, style_grams, style_weights, content_features, content_weight, style_weight, train, save_dir):
     '''
         Inputs:
         target - The target image to create. This should be a 'blank' image to start
@@ -46,11 +47,13 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
         content_features - The content features from the convolutional model
         content_weight - The ratio for the content weight to style weight. This, along with style_weight, controls how much content vs style is created on the target image.
         style_weight - The ratio for the style weight to content weight. This, along with content_weight, controls how much content vs style is created on the target image.
+        train - Boolean for if we are training style grams
+        save_dir - Checkpoint save name
 
         Outputs:
         This method will display the target image as its being created
     '''
-    print("Creating the target image...")
+    print("Creating the target image(s)...")
     # for displaying the target image, intermittently
     show_every = show_every
 
@@ -99,7 +102,15 @@ def create_target_image(target, model, steps, show_every, style_grams, style_wei
             plt.imshow(ProcessImage.im_convert(target))
             plt.show()
 
-    print("Done creating the target image.\n")
+        # If we are training and are at the halfway point, save a "low" checkpoint
+        if (ii == (steps/2)) and train:
+            # Save the checkpoint
+            save_checkpoint(save_dir + "-low.pth", model, style_grams, style_weights)
+
+
+    if train:
+        save_checkpoint(save_dir + "-high.pth", model, style_grams, style_weights)
+    print("Done creating the target image(s).\n")
 
 
 def save_checkpoint(save_path, model, style_grams, style_weights):
@@ -110,12 +121,16 @@ def save_checkpoint(save_path, model, style_grams, style_weights):
         save_path: The relative path, including the file name and extension, to save the checkpoint to
         model: The model that was used to train for the style_transfer
     '''
-    print("Saving the checkpoint...")
+    print("\nSaving the checkpoint...")
     checkpoint = {'state_dict': model.state_dict(),
                   'style_grams': style_grams,
                   'style_weights': style_weights}
     
-    torch.save(checkpoint, save_path)
+    # Check that the checkpoints directory exists. If not create one
+    if not os.path.isdir('./checkpoints/'):
+        os.makedirs('./checkpoints/')
+
+    torch.save(checkpoint, "./checkpoints/" + save_path)
     print("Done saving the checkpoint.\n")
 
 
@@ -130,8 +145,9 @@ def load_checkpoint(load_path, gpu):
         Output:
         returns the model loaded with the checkpoint
     '''
+    print("Loading style gram checkpoint...")
     # Get the checkpoint from the file path
-    checkpoint = torch.load(load_path)
+    checkpoint = torch.load( "./checkpoints/" + load_path)
 
     # Load the vgg19 model from torchvision
     model = getattr(models, 'vgg19')(pretrained = True).features
@@ -150,5 +166,6 @@ def load_checkpoint(load_path, gpu):
     device = torch.device("cuda" if torch.cuda.is_available() and gpu else "cpu")
     model.to(device)
 
+    print("Done loading style gram checkpoint.\n")
     # Return the model
     return model, style_grams, style_weights
